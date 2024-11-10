@@ -1,44 +1,49 @@
 package dev.mayaqq.estrogen.networking.messages.c2s;
 
-import com.teamresourceful.bytecodecs.base.ByteCodec;
-import com.teamresourceful.resourcefullib.common.network.Packet;
-import com.teamresourceful.resourcefullib.common.network.base.PacketType;
-import com.teamresourceful.resourcefullib.common.network.base.ServerboundPacketType;
-import com.teamresourceful.resourcefullib.common.network.defaults.CodecPacketType;
+import com.teamresourceful.resourcefullib.common.networking.base.Packet;
+import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
+import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
 import dev.mayaqq.estrogen.Estrogen;
 import dev.mayaqq.estrogen.features.dash.CommonDash;
 import dev.mayaqq.estrogen.registry.EstrogenEffects;
 import dev.mayaqq.estrogen.registry.EstrogenSounds;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.player.Player;
 
-import java.util.function.Consumer;
-
-public record DashPacket(boolean sound) implements Packet<DashPacket> {
-
-    public static final ServerboundPacketType<DashPacket> TYPE = new Type();
+@SuppressWarnings("ClassEscapesDefinedScope")
+public record DashPacket(Boolean sound) implements Packet<DashPacket> {
+    public static Handler HANDLER = new Handler();
+    public static final ResourceLocation ID = Estrogen.id("dash");
 
     @Override
-    public PacketType<DashPacket> type() {
-        return TYPE;
+    public ResourceLocation getID() {
+        return ID;
     }
 
-    private static class Type extends CodecPacketType.Server<DashPacket> {
+    @Override
+    public PacketHandler<DashPacket> getHandler() {
+        return HANDLER;
+    }
 
-        public Type() {
-            super(
-                    DashPacket.class,
-                    Estrogen.id("dash"),
-                    ByteCodec.BOOLEAN.map(DashPacket::new, DashPacket::sound)
-            );
+    private static class Handler implements PacketHandler<DashPacket> {
+
+        @Override
+        public void encode(DashPacket message, FriendlyByteBuf buffer) {
+            buffer.writeBoolean(message.sound);
         }
 
         @Override
-        public Consumer<Player> handle(DashPacket message) {
-            return (player) -> {
-                if (player.hasEffect(EstrogenEffects.ESTROGEN_EFFECT.get()) && player.level() instanceof ServerLevel serverLevel) {
+        public DashPacket decode(FriendlyByteBuf buffer) {
+            return new DashPacket(buffer.readBoolean());
+        }
+
+        @Override
+        public PacketContext handle(DashPacket message) {
+            return (player, level) -> {
+                if (player.hasEffect(EstrogenEffects.ESTROGEN_EFFECT.get()) && level instanceof ServerLevel serverLevel) {
                     if (message.sound) serverLevel.playSound(null, player.blockPosition(), EstrogenSounds.DASH.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
                     // dash cooldown
                     if (message.sound) CommonDash.setDashing(player.getUUID());
