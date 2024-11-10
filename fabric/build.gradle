@@ -15,7 +15,16 @@ configurations {
     developmentFabric.extendsFrom common
 }
 
-repositories {}
+repositories {
+    // mavens for Fabric-exclusives
+    maven { url = "https://api.modrinth.com/maven" } // LazyDFU
+    maven { url = "https://maven.terraformersmc.com/releases/" } // Mod Menu
+    maven { url = "https://mvn.devos.one/snapshots/" } // Create Fabric, Porting Lib, Forge Tags, Milk Lib, Registrate Fabric
+    maven { url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/" } // Forge Config API Port
+    maven { url = "https://maven.cafeteria.dev/releases" } // Fake Player API
+    maven { url = "https://maven.jamieswhiteshirt.com/libs-release" } // Reach Entity Attributes
+    maven { url = "https://jitpack.io/" } // Mixin Extras, Fabric ASM
+}
 
 sourceSets {
     create("datagen") {
@@ -34,8 +43,10 @@ dependencies {
     //Create
     modImplementation("com.simibubi.create:create-fabric-${rootProject.minecraft_version}:${rootProject.create_fabric_version}+mc${rootProject.minecraft_version}")
 
+    //Porting Lib
+    modImplementation(include("io.github.fabricators_of_create.Porting-Lib:transfer:${rootProject.porting_lib_version}"))
+
     //Trinkets
-    include modImplementation("earth.terrarium.baubly:baubly-fabric-${rootProject.minecraft_version}:${rootProject.baubly_version}") transitive false
     modImplementation("dev.emi:trinkets:${rootProject.trinkets_version}")
     project.cardinal_modules.replaceAll(" ", "").split(",").each { module ->
         modApi("dev.onyxstudios.cardinal-components-api:cardinal-components-${module}:${rootProject.cardinal_version}")

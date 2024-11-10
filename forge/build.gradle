@@ -14,7 +14,11 @@ configurations {
     developmentForge.extendsFrom common
 }
 
-repositories {}
+repositories {
+    maven {
+        url = "https://maven.theillusivec4.top/"
+    }
+}
 
 dependencies {
     //Forge
@@ -30,8 +34,7 @@ dependencies {
     modImplementation("com.jozufozu.flywheel:flywheel-forge-${rootProject.minecraft_version}:${rootProject.flywheel_version}")
 
     //Curios
-    include modImplementation("earth.terrarium.baubly:baubly-forge-${rootProject.minecraft_version}:${rootProject.baubly_version}") transitive false
-    modImplementation("top.theillusivec4.curios:curios-forge:${rootProject.curios_version}+${rootProject.minecraft_version}")
+    modImplementation("top.theillusivec4.curios:curios-forge:${rootProject.curios_version}")
 
     //Mixin Extras
     compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:${rootProject.mixin_extras_version}"))
